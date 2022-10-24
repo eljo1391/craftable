@@ -1,0 +1,62 @@
+version: '3'
+
+services:
+  app:
+    image: eljo1391/laravel-base:php80-bullseye
+    working_dir: /src
+    environment:
+      DISPLAY: :0
+      TZ: America/Asuncion
+    volumes:
+      - ./:/src
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    ports:
+      - 8084:80
+    depends_on:
+      - database
+    networks:
+      - postgres
+
+  pgadmin:
+    image: dpage/pgadmin4:6.2
+    environment:
+      PGADMIN_DEFAULT_EMAIL: test@dncp.gov.py
+      PGADMIN_DEFAULT_PASSWORD: postgres
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      TZ: America/Asuncion
+    volumes:
+      - pgadmin51:/root/.pgadmin
+    ports:
+      - 5084:80
+    networks:
+      - postgres
+    depends_on:
+      - database
+    restart: unless-stopped
+
+  database:
+    image: postgres:${POSTGRES_VERSION:-13}-alpine
+    restart: always
+    ports:
+      - 5484:5432
+    environment:
+      TZ: America/Asuncion
+      POSTGRES_DB: ${POSTGRES_DB:-craftable}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+    volumes:
+      - db-data51:/var/lib/postgresql/data:rw
+    networks:
+      - postgres
+
+###< doctrine/doctrine-bundle ###
+
+###> doctrine/doctrine-bundle ###
+
+volumes:
+  db-data51:
+  pgadmin51:
+
+networks:
+  postgres:
+    driver: bridge
